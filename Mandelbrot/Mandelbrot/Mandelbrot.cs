@@ -106,6 +106,9 @@ ImageBoxImage.Image = ImageBoxDrawing;
 //button event
 goBtn.Click += GoBtn_Click;
 
+//variables
+int maxAantal = 100;
+
 void GoBtn_Click(object sender, EventArgs e)
 {
     IterateTroughPixels();
@@ -115,6 +118,8 @@ void IterateTroughPixels()
 {
     if (ValidateInputs())
     {
+        maxAantal = Int32.Parse(maxAantalInput.Text);
+
         float x = float.Parse(middenXInput.Text);
         float y = float.Parse(middenYInput.Text);
         float schaal = float.Parse(schaalInput.Text);
@@ -135,6 +140,7 @@ void IterateTroughPixels()
                     pixelColor = Brushes.Black;
                 }
                 ImageBoxDrawer.FillRectangle(pixelColor, i, j, 1, 1);
+
             }
 
         }
@@ -150,6 +156,8 @@ bool ValidateInputs() {
     return true;
 }
 
+
+
 int calculateMandelBrotFromPoint(double x, double y){
 
     int teller = 0;
@@ -159,7 +167,7 @@ int calculateMandelBrotFromPoint(double x, double y){
     double mandelBrotB = 0;
     //Give a maximum to the calculation
     
-    for (int i = 0; i < Int32.Parse(maxAantalInput.Text); i++)
+    for (int i = 0; i < maxAantal; i++)
     {
         if (CheckPythagoras(mandelBrotA, mandelBrotB, 0, 0))
         {
