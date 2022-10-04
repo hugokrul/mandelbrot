@@ -103,10 +103,10 @@ string[] presetsKleur = {"roze", "groen", "rood", "wit", "kleuren"};
 
 
 
-string[] presets = { "Hugooo", "mandelbrot in mandelbrot" };
-string[] middenXPresets = { "-30,681640625", "-59.815625" };
-string[] middenYPresets = { "-64,05078125", "-66.23906249999999" };
-string[] schaalPresets = { "0,001953125", "0.00234375" };
+string[] presets = { "Spiraal", "Mandelbrot in mandelbrot" };
+string[] middenXPresets = { "36.98388671875", "-59.815625" };
+string[] middenYPresets = { "-67.1396484375", "-66.23906249999999" };
+string[] schaalPresets = { "0.000244140625", "0.00234375" };
 
 kleurDropDown.Items.AddRange(presetsKleur);
 dropdown.Items.AddRange(presets);
