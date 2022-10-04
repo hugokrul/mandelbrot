@@ -3,10 +3,12 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
 
+int[] kleur = {128, 128, 128};
+
 Form scherm = new Form();
 scherm.Text = "MandelBrot";
 scherm.BackColor = Color.LightGray;
-scherm.ClientSize = new Size(420, 610);
+scherm.ClientSize = new Size(600, 610);
 
 // Create all GUI elements
 Button goBtn = new Button();
@@ -26,7 +28,9 @@ schaalLabel.Text = "schaal";
 Label maxAantalLabel = new Label();
 maxAantalLabel.Text = "maxAantal";
 Label dropdownLabel = new Label();
-dropdownLabel.Text = "Optional preset:";
+dropdownLabel.Text = "Optional preset";
+Label kleurLabel = new Label();
+kleurLabel.Text = "Kleur";
 
 // InputBoxes
 TextBox middenXInput = new TextBox();
@@ -34,6 +38,7 @@ TextBox middenYInput = new TextBox();
 TextBox schaalInput = new TextBox();
 TextBox maxAantalInput = new TextBox();
 ComboBox dropdown = new ComboBox();
+ComboBox kleurDropDown = new ComboBox();
 
 //Other
 ProgressBar progressBar = new ProgressBar();
@@ -47,14 +52,16 @@ middenYLabel.Location = new Point(10, 40);
 schaalLabel.Location = new Point(10, 70);
 maxAantalLabel.Location = new Point(10, 100);
 dropdownLabel.Location = new Point(10, 135);
+kleurLabel.Location = new Point(330, 10);
 
 middenXInput.Location = new Point(120, 10);
 middenYInput.Location = new Point(120, 40);
 schaalInput.Location = new Point(120, 70);
 maxAantalInput.Location = new Point(120, 100);
 dropdown.Location = new Point(120, 135);
+kleurDropDown.Location = new Point(400, 10);
 
-progressBar.Location = new Point(10, 580);
+progressBar.Location = new Point(100, 580);
 
 // Specify Size of the Elements
 goBtn.Size = new Size(50, 25);
@@ -65,26 +72,33 @@ middenYLabel.Size = new Size(100, 30);
 schaalLabel.Size = new Size(100, 30);
 maxAantalLabel.Size = new Size(100, 30);
 dropdownLabel.Size = new Size(100, 30);
+kleurLabel.Size = new Size(50, 30);
 
 middenXInput.Size = new Size(200, 30);
 middenYInput.Size = new Size(200, 30);
 schaalInput.Size = new Size(200, 30);
 maxAantalInput.Size = new Size(100, 30);
 dropdown.Size = new Size(200, 20);
+kleurDropDown.Size = new Size(180, 20);
 
 progressBar.Size = new Size(400, 20);
 progressBar.BackColor = Color.DarkGray;
 
-middenXInput.Text = "0";
+middenXInput.Text = "-50";
 middenYInput.Text = "0";
-schaalInput.Text = "1";
+schaalInput.Text = "0.6";
 maxAantalInput.Text = "100";
 
-string[] presets = { "Hugooo", "KOEN" };
-string[] middenXPresets = { "100", "-25,4903564453125" };
-string[] middenYPresets = { "100", "-65,5469970703125" };
-string[] schaalPresets = { "0,25", "6,103515625E-05" };
+string[] presetsKleur = {"roze", "groen", "rood", "zwart"};
 
+
+
+string[] presets = { "Hugooo", "mandelbrot in mandelbrot" };
+string[] middenXPresets = { "-8.634765625", "-59.815625" };
+string[] middenYPresets = { "-87.310546875", "-66.23906249999999" };
+string[] schaalPresets = { "0.0009765625", "0.00234375" };
+
+kleurDropDown.Items.AddRange(presetsKleur);
 dropdown.Items.AddRange(presets);
 
 // Add all elements to the screen
@@ -96,12 +110,14 @@ scherm.Controls.Add(middenYLabel);
 scherm.Controls.Add(schaalLabel);
 scherm.Controls.Add(maxAantalLabel);
 scherm.Controls.Add(dropdownLabel);
+scherm.Controls.Add(kleurLabel);
 
 scherm.Controls.Add(middenXInput);
 scherm.Controls.Add(middenYInput);
 scherm.Controls.Add(schaalInput);
 scherm.Controls.Add(maxAantalInput);
 scherm.Controls.Add(dropdown);
+scherm.Controls.Add(kleurDropDown);
 
 scherm.Controls.Add(progressBar);
 
@@ -112,7 +128,7 @@ Graphics ImageBoxDrawer = Graphics.FromImage(ImageBoxDrawing);
 //create Label
 Label ImageBoxImage = new Label();
 scherm.Controls.Add(ImageBoxImage);
-ImageBoxImage.Location = new Point(10, 170);
+ImageBoxImage.Location = new Point(100, 170);
 
 //Image Size Variable
 double imageSize = 400;
@@ -130,6 +146,7 @@ string[] savedMiddenYInput = { "0" };
 string[] savedSchaalInput = { "1" };
 string[] savedMaxAantalInput = { "100" };
 int currentUndoPosition = 0;
+
 
 //button event
 goBtn.Click += GoBtn_Click;
@@ -173,11 +190,22 @@ void IterateTroughPixels()
             {
                 //Columns
                 double remappedPixelY = (-2 + ((y /schaal) / (imageSize/4)) + (j / (imageSize / 4))) * schaal;
+                int mandelPointGetal = calculateMandelBrotFromPoint(remappedPixelX, remappedPixelY);
                 Brush pixelColor = Brushes.White;
-                if (calculateMandelBrotFromPoint(remappedPixelX, remappedPixelY) % 2 == 0)
+                if (mandelPointGetal == maxAantal)
                 {
                     pixelColor = Brushes.Black;
+                } else {
+                    // int r = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[0]));
+                    // int g = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[1]));
+                    // int b = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[2]));
+
+                    SetColor(mandelPointGetal);
+
+                    Color color = Color.FromArgb(kleur[0], kleur[1], kleur[2]);
+                    pixelColor = new SolidBrush(color);
                 }
+
                 ImageBoxDrawer.FillRectangle(pixelColor, i, j, 1, 1);
 
             }
@@ -186,7 +214,129 @@ void IterateTroughPixels()
     }
     else
     {
-        goBtn.Text = "Invalid Inputs";
+        goBtn.Text = "Invalid";
+    }
+}
+
+void SetColor(int value) {
+    // int[] calcultedColor = {0, 0, 0};
+
+    if (value != maxAantal) {
+        int colornr = value % 16;
+        switch(colornr) {
+            case 0: {
+                kleur[0] = 66;
+                kleur[1] = 30;
+                kleur[2] = 15;
+                break;
+            }
+            case 1: {
+                kleur[0] = 25;
+                kleur[1] = 7;
+                kleur[2] = 26;
+                break;
+
+            }
+            case 2: {
+                kleur[0] = 9;
+                kleur[1] = 1;
+                kleur[2] = 47;
+                break;
+
+            }
+            case 3: {
+                kleur[0] = 4;
+                kleur[1] = 4;
+                kleur[2] = 73;
+                break;
+
+            }
+            case 4: {
+                kleur[0] = 12;
+                kleur[1] = 44;
+                kleur[2] = 138;
+                break;
+
+            }
+            case 5: {
+                kleur[0] = 12;
+                kleur[1] = 44;
+                kleur[2] = 138;
+                break;
+
+            }
+            case 6: {
+                kleur[0] = 24;
+                kleur[1] = 82;
+                kleur[2] = 177;
+                break;
+
+            }
+            case 7: {
+                kleur[0] = 57;
+                kleur[1] = 125;
+                kleur[2] = 209;
+                break;
+
+            }
+            case 8: {
+                kleur[0] = 134;
+                kleur[1] = 181;
+                kleur[2] = 229;
+                break;
+
+            }
+            case 9: {
+                kleur[0] = 211;
+                kleur[1] = 236;
+                kleur[2] = 248;
+                break;
+
+            }
+            case 10: {
+                kleur[0] = 241;
+                kleur[1] = 233;
+                kleur[2] = 191;
+                break;
+
+            }
+            case 11: {
+                kleur[0] = 248;
+                kleur[1] = 201;
+                kleur[2] = 95;
+                break;
+
+            }
+            case 12: {
+                kleur[0] = 255;
+                kleur[1] = 170;
+                kleur[2] = 0;
+                break;
+
+            }
+            case 13: {
+                kleur[0] = 204;
+                kleur[1] = 128;
+                kleur[2] = 0;
+                break;
+
+            }
+            case 14: {
+                kleur[0] = 153;
+                kleur[1] = 87;
+                kleur[2] = 0;
+                break;
+
+            }
+            case 15: {
+                kleur[0] = 106;
+                kleur[1] = 52;
+                kleur[2] = 3;
+                break;
+
+            }
+
+        }
     }
 }
 
@@ -230,7 +380,7 @@ int calculateMandelBrotFromPoint(double x, double y){
 }
 
 
- bool CheckPythagoras(double ax, double ay, double bx, double by)
+bool CheckPythagoras(double ax, double ay, double bx, double by)
 {
     // Check if distance between 2 points < 2, return bool
     double sqrt = Math.Pow((ax-bx), 2) + Math.Pow((ay-by), 2);   
@@ -263,7 +413,13 @@ void Input_KeyDown(object sender, KeyEventArgs e)
     if (e.KeyCode == Keys.Enter) {
         IterateTroughPixels();
     }
-};
+}
+
+// map functie mapt een value uit een range[leftmin, leftmax] naar een andere range[rightmin, rightmax]
+float map( float value, float leftMin, float leftMax, float rightMin, float rightMax )
+{
+  return rightMin + ( value - leftMin ) * ( rightMax - rightMin ) / ( leftMax - leftMin );
+}
 
 //Undo button
 undoBtn.Click += UndoBtn_Click;
@@ -287,6 +443,31 @@ void UndoBtn_Click(object sender, EventArgs e)
 };
 
 dropdown.SelectedIndexChanged += Dropdown_SelectedIndexChanged;
+kleurDropDown.SelectedIndexChanged += kleurDropDown_SelectedIndexchanged;
+
+void kleurDropDown_SelectedIndexchanged(object sender, EventArgs e) {
+    // presetsKleur[kleurDropDown.SelectedIndex]
+    if (presetsKleur[kleurDropDown.SelectedIndex] == "roze") {
+        kleur[0] = 234;
+        kleur[1] = 137;
+        kleur[2] = 154;
+    } else if (presetsKleur[kleurDropDown.SelectedIndex] == "groen") {
+        kleur[0] = 0;
+        kleur[1] = 255;
+        kleur[2] = 0;
+    } else if (presetsKleur[kleurDropDown.SelectedIndex] == "rood") {
+        kleur[0] = 255;
+        kleur[1] = 0;
+        kleur[2] = 0;
+    } else if (presetsKleur[kleurDropDown.SelectedIndex] == "zwart") {
+        kleur[0] = 0;
+        kleur[1] = 0;
+        kleur[2] = 0;
+    }
+
+    currentUndoPosition = 0;
+    IterateTroughPixels();
+}
 
 void Dropdown_SelectedIndexChanged(object sender, EventArgs e)
 {
