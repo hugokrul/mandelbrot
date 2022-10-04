@@ -89,7 +89,7 @@ middenYInput.Text = "0";
 schaalInput.Text = "0.6";
 maxAantalInput.Text = "100";
 
-string[] presetsKleur = {"roze", "groen", "rood", "zwart"};
+string[] presetsKleur = {"roze", "groen", "rood", "wit", "kleuren"};
 
 
 
@@ -146,17 +146,17 @@ string[] savedMiddenYInput = { "0" };
 string[] savedSchaalInput = { "1" };
 string[] savedMaxAantalInput = { "100" };
 int currentUndoPosition = 0;
-
+bool kleurZelfGekozen = false;
 
 //button event
 goBtn.Click += GoBtn_Click;
 void GoBtn_Click(object sender, EventArgs e)
 {
     currentUndoPosition = 0;
-    IterateTroughPixels();
+    IterateTroughPixels(kleurZelfGekozen);
 }
 
-void IterateTroughPixels()
+void IterateTroughPixels(bool kleurZelfGekozen=false)
 {
     if (ValidateInputs(middenXInput.Text, middenYInput.Text, schaalInput.Text, maxAantalInput.Text))
     {
@@ -196,13 +196,18 @@ void IterateTroughPixels()
                 {
                     pixelColor = Brushes.Black;
                 } else {
-                    // int r = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[0]));
-                    // int g = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[1]));
-                    // int b = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[2]));
+                    Color color;
+                    if (kleurZelfGekozen) {
+                        int r = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[0]));
+                        int g = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[1]));
+                        int b = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[2]));
+                        color = Color.FromArgb(r, g, b);      
+                    } else {
+                        SetColor(mandelPointGetal);
+                        color = Color.FromArgb(kleur[0], kleur[1], kleur[2]);      
 
-                    SetColor(mandelPointGetal);
+                    }
 
-                    Color color = Color.FromArgb(kleur[0], kleur[1], kleur[2]);
                     pixelColor = new SolidBrush(color);
                 }
 
@@ -397,7 +402,7 @@ void ImageBoxImage_MouseDoubleClick(object sender, MouseEventArgs e)
     middenYInput.Text = ((double.Parse(middenYInput.Text) + (e.Y - 200) * double.Parse(schaalInput.Text))).ToString();
 
     currentUndoPosition = 0;
-    IterateTroughPixels();
+    IterateTroughPixels(kleurZelfGekozen);
 }
 
 //features
@@ -411,7 +416,7 @@ schaalInput.KeyDown += Input_KeyDown;
 void Input_KeyDown(object sender, KeyEventArgs e)
 {
     if (e.KeyCode == Keys.Enter) {
-        IterateTroughPixels();
+        IterateTroughPixels(kleurZelfGekozen);
     }
 }
 
@@ -437,7 +442,7 @@ void UndoBtn_Click(object sender, EventArgs e)
         middenYInput.Text = savedMiddenYInput[savedMiddenYInput.Length - 1 - currentUndoPosition];
         schaalInput.Text = savedSchaalInput[savedSchaalInput.Length - 1 - currentUndoPosition];
         maxAantalInput.Text = savedMaxAantalInput[savedMaxAantalInput.Length - 1 - currentUndoPosition];
-        IterateTroughPixels();
+        IterateTroughPixels(kleurZelfGekozen);
     }
     
 };
@@ -451,22 +456,31 @@ void kleurDropDown_SelectedIndexchanged(object sender, EventArgs e) {
         kleur[0] = 234;
         kleur[1] = 137;
         kleur[2] = 154;
+        kleurZelfGekozen = true;
     } else if (presetsKleur[kleurDropDown.SelectedIndex] == "groen") {
         kleur[0] = 0;
         kleur[1] = 255;
         kleur[2] = 0;
+        kleurZelfGekozen = true;
     } else if (presetsKleur[kleurDropDown.SelectedIndex] == "rood") {
         kleur[0] = 255;
         kleur[1] = 0;
         kleur[2] = 0;
-    } else if (presetsKleur[kleurDropDown.SelectedIndex] == "zwart") {
-        kleur[0] = 0;
-        kleur[1] = 0;
-        kleur[2] = 0;
+        kleurZelfGekozen = true;
+    } else if (presetsKleur[kleurDropDown.SelectedIndex] == "wit") {
+        kleur[0] = 255;
+        kleur[1] = 255;
+        kleur[2] = 255;
+        kleurZelfGekozen = true;
+    } else if (presetsKleur[kleurDropDown.SelectedIndex] == "kleuren") {
+        kleur[0] = 255;
+        kleur[1] = 255;
+        kleur[2] = 255;
+        kleurZelfGekozen = false;
     }
 
     currentUndoPosition = 0;
-    IterateTroughPixels();
+    IterateTroughPixels(kleurZelfGekozen);
 }
 
 void Dropdown_SelectedIndexChanged(object sender, EventArgs e)
@@ -475,7 +489,7 @@ void Dropdown_SelectedIndexChanged(object sender, EventArgs e)
     middenYInput.Text = middenYPresets[dropdown.SelectedIndex];
     schaalInput.Text = schaalPresets[dropdown.SelectedIndex];
     currentUndoPosition = 0;
-    IterateTroughPixels();
+    IterateTroughPixels(kleurZelfGekozen);
 }
 
 Application.Run(scherm);
