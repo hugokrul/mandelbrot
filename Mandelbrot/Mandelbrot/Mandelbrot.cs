@@ -2,6 +2,8 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Globalization;
+using System.Text;
 
 int[] kleur = {128, 128, 128};
 
@@ -24,11 +26,11 @@ middenXLabel.Text = "MiddenX";
 Label middenYLabel = new Label();
 middenYLabel.Text = "MiddenY";
 Label schaalLabel = new Label();
-schaalLabel.Text = "schaal";
+schaalLabel.Text = "Schaal";
 Label maxAantalLabel = new Label();
-maxAantalLabel.Text = "maxAantal";
+maxAantalLabel.Text = "MaxAantal";
 Label dropdownLabel = new Label();
-dropdownLabel.Text = "Optional preset";
+dropdownLabel.Text = "Preset";
 Label kleurLabel = new Label();
 kleurLabel.Text = "Kleur";
 
@@ -42,37 +44,43 @@ ComboBox kleurDropDown = new ComboBox();
 
 //Other
 ProgressBar progressBar = new ProgressBar();
+Panel inputsPanel = new Panel();
+Panel extrasPanel = new Panel();
 
 // Specify location of the elements
 goBtn.Location = new Point(250, 100);
 undoBtn.Location = new Point(310, 100);
 
-middenXLabel.Location = new Point(10, 10);
-middenYLabel.Location = new Point(10, 40);
-schaalLabel.Location = new Point(10, 70);
-maxAantalLabel.Location = new Point(10, 100);
-dropdownLabel.Location = new Point(10, 135);
-kleurLabel.Location = new Point(330, 10);
+int xOffset = 20;
 
-middenXInput.Location = new Point(120, 10);
-middenYInput.Location = new Point(120, 40);
-schaalInput.Location = new Point(120, 70);
-maxAantalInput.Location = new Point(120, 100);
-dropdown.Location = new Point(120, 135);
-kleurDropDown.Location = new Point(400, 10);
+middenXLabel.Location = new Point(xOffset, 10);
+middenYLabel.Location = new Point(xOffset, 40);
+schaalLabel.Location = new Point(xOffset, 70);
+maxAantalLabel.Location = new Point(xOffset, 100);
+dropdownLabel.Location = new Point(xOffset, 135);
+kleurLabel.Location = new Point(330 + xOffset, 10);
+
+middenXInput.Location = new Point(110 + xOffset, 10);
+middenYInput.Location = new Point(110 + xOffset, 40);
+schaalInput.Location = new Point(110 + xOffset, 70);
+maxAantalInput.Location = new Point(110 + xOffset, 100);
+dropdown.Location = new Point(110 + xOffset, 135);
+kleurDropDown.Location = new Point(390 + xOffset, 10);
 
 progressBar.Location = new Point(100, 580);
+inputsPanel.Location = new Point(10, 10);
+extrasPanel.Location = new Point(200, 10);
 
 // Specify Size of the Elements
 goBtn.Size = new Size(50, 25);
 undoBtn.Size = new Size(50, 25);
 
-middenXLabel.Size = new Size(100, 30);
-middenYLabel.Size = new Size(100, 30);
-schaalLabel.Size = new Size(100, 30);
-maxAantalLabel.Size = new Size(100, 30);
-dropdownLabel.Size = new Size(100, 30);
-kleurLabel.Size = new Size(50, 30);
+middenXLabel.Size = new Size(100, 25);
+middenYLabel.Size = new Size(100, 25);
+schaalLabel.Size = new Size(100, 25);
+maxAantalLabel.Size = new Size(100, 25);
+dropdownLabel.Size = new Size(100, 25);
+kleurLabel.Size = new Size(50, 25);
 
 middenXInput.Size = new Size(200, 30);
 middenYInput.Size = new Size(200, 30);
@@ -83,10 +91,12 @@ kleurDropDown.Size = new Size(180, 20);
 
 progressBar.Size = new Size(400, 20);
 progressBar.BackColor = Color.DarkGray;
+inputsPanel.Size = new Size(400, 180);
+extrasPanel.Size = new Size(400, 180);
 
-middenXInput.Text = "-50";
+middenXInput.Text = "0";
 middenYInput.Text = "0";
-schaalInput.Text = "0.6";
+schaalInput.Text = "1";
 maxAantalInput.Text = "100";
 
 string[] presetsKleur = {"roze", "groen", "rood", "wit", "kleuren"};
@@ -94,9 +104,9 @@ string[] presetsKleur = {"roze", "groen", "rood", "wit", "kleuren"};
 
 
 string[] presets = { "Hugooo", "mandelbrot in mandelbrot" };
-string[] middenXPresets = { "-8.634765625", "-59.815625" };
-string[] middenYPresets = { "-87.310546875", "-66.23906249999999" };
-string[] schaalPresets = { "0.0009765625", "0.00234375" };
+string[] middenXPresets = { "-30,681640625", "-59.815625" };
+string[] middenYPresets = { "-64,05078125", "-66.23906249999999" };
+string[] schaalPresets = { "0,001953125", "0.00234375" };
 
 kleurDropDown.Items.AddRange(presetsKleur);
 dropdown.Items.AddRange(presets);
@@ -120,6 +130,8 @@ scherm.Controls.Add(dropdown);
 scherm.Controls.Add(kleurDropDown);
 
 scherm.Controls.Add(progressBar);
+scherm.Controls.Add(inputsPanel);
+scherm.Controls.Add(extrasPanel);
 
 // Create Image Box
 Bitmap ImageBoxDrawing = new Bitmap(400, 400);
@@ -137,6 +149,34 @@ ImageBoxImage.Size = new Size(400, 400);
 ImageBoxImage.BackColor = Color.White;
 
 ImageBoxImage.Image = ImageBoxDrawing;
+
+//UI improvements
+//scherm.BackColor = Color.Black;
+//scherm.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+//inputsPanel.BackColor = Color.DimGray;
+//extrasPanel.BackColor = Color.DimGray;
+
+Font font = new Font("Montserrat", 10, FontStyle.Bold);
+middenXLabel.Font = font;
+middenYLabel.Font = font;
+schaalLabel.Font = font;
+maxAantalLabel.Font = font;
+dropdownLabel.Font = font;
+kleurLabel.Font = font;
+middenXLabel.BackColor = Color.Transparent;
+middenYLabel.BackColor = Color.Transparent;
+schaalLabel.BackColor = Color.Transparent;
+maxAantalLabel.BackColor = Color.Transparent;
+dropdownLabel.BackColor = Color.Transparent;
+kleurLabel.BackColor = Color.Transparent;
+middenXLabel.TextAlign = ContentAlignment.MiddleLeft;
+middenYLabel.TextAlign = ContentAlignment.MiddleLeft;
+schaalLabel.TextAlign = ContentAlignment.MiddleLeft;
+maxAantalLabel.TextAlign = ContentAlignment.MiddleLeft;
+dropdownLabel.TextAlign = ContentAlignment.MiddleLeft;
+kleurLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+
 
 //variables
 int maxAantal = 100;
@@ -162,8 +202,11 @@ void IterateTroughPixels(bool kleurZelfGekozen=false)
     {
         maxAantal = Int32.Parse(maxAantalInput.Text);
 
+
+        //If not undoing
         if (currentUndoPosition == 0)
         {
+            //push all values to arrays for later undoing
             Array.Resize(ref savedMiddenXInput, savedMiddenXInput.Length + 1);
             savedMiddenXInput[savedMiddenXInput.GetUpperBound(0)] = middenXInput.Text;
             Array.Resize(ref savedMiddenYInput, savedMiddenYInput.Length + 1);
@@ -174,9 +217,15 @@ void IterateTroughPixels(bool kleurZelfGekozen=false)
             savedMaxAantalInput[savedMaxAantalInput.GetUpperBound(0)] = maxAantalInput.Text;
         }
 
-        float x = float.Parse(middenXInput.Text);
-        float y = float.Parse(middenYInput.Text);
-        float schaal = float.Parse(schaalInput.Text);
+        //Replace , to work on all computers, add culture to correct for system language
+        CultureInfo ci = CultureInfo.CurrentCulture;
+        string replacee = "";
+        string replacement = "";
+        if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; } 
+        float x = float.Parse(middenXInput.Text.Replace(replacee, replacement));
+        float y = float.Parse(middenYInput.Text.Replace(replacee, replacement));
+        float schaal = float.Parse(schaalInput.Text.Replace(replacee, replacement));
+
 
         ImageBoxImage.Invalidate();
         //loop trough every pixel width and make it between a range between -2 and 2
