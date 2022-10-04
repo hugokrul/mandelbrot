@@ -452,6 +452,20 @@ bool CheckPythagoras(double ax, double ay, double bx, double by)
 
 
 ImageBoxImage.MouseDoubleClick += ImageBoxImage_MouseDoubleClick;
+ImageBoxImage.MouseClick += ImageBoxImage_MouseRichtClick;
+
+void ImageBoxImage_MouseRichtClick(object sender, MouseEventArgs e) {
+    if (e.Button == System.Windows.Forms.MouseButtons.Right) {
+        // als de rechtermuis is geklikt rekent hij uit wat de schaal, de x en de y coordinaten worden
+        schaalInput.Text = (double.Parse(schaalInput.Text) * 2).ToString();
+        middenXInput.Text = ((double.Parse(middenXInput.Text) + (e.X - 200) * double.Parse(schaalInput.Text))).ToString();
+        middenYInput.Text = ((double.Parse(middenYInput.Text) + (e.Y - 200) * double.Parse(schaalInput.Text))).ToString();
+
+        currentUndoPosition = 0;
+        // de functie IterateThroughPixels() zal de waarde van schaalInput.Text, etc gebruiken
+        IterateTroughPixels(kleurZelfGekozen);
+    }
+}
 
 void ImageBoxImage_MouseDoubleClick(object sender, MouseEventArgs e)
 {
