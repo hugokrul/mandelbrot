@@ -219,7 +219,7 @@ void IterateTroughPixels()
 }
 
 void SetColor(int value) {
-    // int[] calcultedColor = {0, 0, 0};
+    // int[] calcultedColor = {0, 0, 0}
 
     if (value != maxAantal) {
         int colornr = value % 16;
