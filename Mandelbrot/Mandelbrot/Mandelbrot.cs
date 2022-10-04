@@ -1,11 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Diagnostics;
 using System.Globalization;
-using System.Text;
-
-int[] kleur = {128, 128, 128};
 
 Form scherm = new Form();
 scherm.Text = "MandelBrot";
@@ -42,6 +38,10 @@ TextBox maxAantalInput = new TextBox();
 ComboBox dropdown = new ComboBox();
 ComboBox kleurDropDown = new ComboBox();
 
+// zet de variabelen
+int[] kleur = {128, 128, 128};
+int xOffset = 20;
+
 //Other
 ProgressBar progressBar = new ProgressBar();
 Panel inputsPanel = new Panel();
@@ -50,8 +50,6 @@ Panel extrasPanel = new Panel();
 // Specify location of the elements
 goBtn.Location = new Point(250, 100);
 undoBtn.Location = new Point(310, 100);
-
-int xOffset = 20;
 
 middenXLabel.Location = new Point(xOffset, 10);
 middenYLabel.Location = new Point(xOffset, 40);
@@ -100,9 +98,6 @@ schaalInput.Text = "1";
 maxAantalInput.Text = "100";
 
 string[] presetsKleur = {"roze", "groen", "rood", "wit", "kleuren"};
-
-
-
 string[] presets = { "Spiraal", "Mandelbrot in mandelbrot" };
 string[] middenXPresets = { "36.98388671875", "-59.815625" };
 string[] middenYPresets = { "-67.1396484375", "-66.23906249999999" };
@@ -110,6 +105,7 @@ string[] schaalPresets = { "0.000244140625", "0.00234375" };
 
 kleurDropDown.Items.AddRange(presetsKleur);
 dropdown.Items.AddRange(presets);
+
 
 // Add all elements to the screen
 scherm.Controls.Add(goBtn);
@@ -137,12 +133,12 @@ scherm.Controls.Add(extrasPanel);
 Bitmap ImageBoxDrawing = new Bitmap(400, 400);
 Graphics ImageBoxDrawer = Graphics.FromImage(ImageBoxDrawing);
 
-//create Label
+// create Label
 Label ImageBoxImage = new Label();
 scherm.Controls.Add(ImageBoxImage);
 ImageBoxImage.Location = new Point(100, 170);
 
-//Image Size Variable
+// Image Size Variable
 double imageSize = 400;
 ImageBoxImage.Size = new Size(400, 400);
 
@@ -150,11 +146,11 @@ ImageBoxImage.BackColor = Color.White;
 
 ImageBoxImage.Image = ImageBoxDrawing;
 
-//UI improvements
-//scherm.BackColor = Color.Black;
-//scherm.FormBorderStyle = FormBorderStyle.FixedToolWindow;
-//inputsPanel.BackColor = Color.DimGray;
-//extrasPanel.BackColor = Color.DimGray;
+// UI improvements
+// scherm.BackColor = Color.Black;
+// scherm.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+// inputsPanel.BackColor = Color.DimGray;
+// extrasPanel.BackColor = Color.DimGray;
 
 Font font = new Font("Montserrat", 10, FontStyle.Bold);
 middenXLabel.Font = font;
@@ -178,7 +174,7 @@ kleurLabel.TextAlign = ContentAlignment.MiddleLeft;
 
 
 
-//variables
+// variables
 int maxAantal = 100;
 
 string[] savedMiddenXInput = { "0" };
@@ -188,7 +184,7 @@ string[] savedMaxAantalInput = { "100" };
 int currentUndoPosition = 0;
 bool kleurZelfGekozen = false;
 
-//button event
+// button event
 goBtn.Click += GoBtn_Click;
 void GoBtn_Click(object sender, EventArgs e)
 {
@@ -203,10 +199,10 @@ void IterateTroughPixels(bool kleurZelfGekozen=false)
         maxAantal = Int32.Parse(maxAantalInput.Text);
 
 
-        //If not undoing
+        // If not undoing
         if (currentUndoPosition == 0)
         {
-            //push all values to arrays for later undoing
+            // push all values to arrays for later undoing
             Array.Resize(ref savedMiddenXInput, savedMiddenXInput.Length + 1);
             savedMiddenXInput[savedMiddenXInput.GetUpperBound(0)] = middenXInput.Text;
             Array.Resize(ref savedMiddenYInput, savedMiddenYInput.Length + 1);
@@ -217,7 +213,7 @@ void IterateTroughPixels(bool kleurZelfGekozen=false)
             savedMaxAantalInput[savedMaxAantalInput.GetUpperBound(0)] = maxAantalInput.Text;
         }
 
-        //Replace , to work on all computers, add culture to correct for system language
+        // Replace , to work on all computers, add culture to correct for system language
         CultureInfo ci = CultureInfo.CurrentCulture;
         string replacee = "~";
         string replacement = "~";
@@ -228,16 +224,16 @@ void IterateTroughPixels(bool kleurZelfGekozen=false)
 
 
         ImageBoxImage.Invalidate();
-        //loop trough every pixel width and make it between a range between -2 and 2
+        // loop trough every pixel width and make it between a range between -2 and 2
         for (float i = 0; i <= imageSize; i++) {
-            //Rows
+            // Rows
             progressBar.Value = Convert.ToInt32((i / imageSize) * 100);
-            //imageSize / 4 --> 400/4 = 100 --> i/100 gives range between -2 and 2
-            //* schaal --> scretches image in both x and y to make it appear it is zoomed in
+            // imageSize / 4 --> 400/4 = 100 --> i/100 gives range between -2 and 2
+            // * schaal --> scretches image in both x and y to make it appear it is zoomed in
             double remappedPixelX = (-2 + (i / (imageSize/4)) + ((x/schaal) / (imageSize / 4))) * schaal;
             for (float j = 0; j <= 400; j++)
             {
-                //Columns
+                // Columns
                 double remappedPixelY = (-2 + ((y /schaal) / (imageSize/4)) + (j / (imageSize / 4))) * schaal;
                 int mandelPointGetal = calculateMandelBrotFromPoint(remappedPixelX, remappedPixelY);
                 Brush pixelColor = Brushes.White;
@@ -247,16 +243,22 @@ void IterateTroughPixels(bool kleurZelfGekozen=false)
                 } else {
                     Color color;
                     if (kleurZelfGekozen) {
+                        /*  
+                        hij mapt hier het mandelgetal naar de aangewezen kleur
+                        op het moment dat je rood kiest verdeelt hij het mandelgetal (bijvoorbeeld 50) naar de range 0 tot 255
+                        dus als het mandelgetal = maxAantal zal de kleur van de pixel 255 zijn en hoe lager het mandelgetal hoe lager de waarde van de kleur
+                        */
                         int r = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[0]));
                         int g = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[1]));
                         int b = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[2]));
                         color = Color.FromArgb(r, g, b);      
                     } else {
+                        // als je de voorgekozen kleur kist rekent hij met setcolor de kleur uit
                         SetColor(mandelPointGetal);
                         color = Color.FromArgb(kleur[0], kleur[1], kleur[2]);      
 
                     }
-
+                    // hier maak je de brush aan met de gekozen kleur
                     pixelColor = new SolidBrush(color);
                 }
 
@@ -273,18 +275,19 @@ void IterateTroughPixels(bool kleurZelfGekozen=false)
 }
 
 void SetColor(int value) {
-    // int[] calcultedColor = {0, 0, 0}
-
     if (value != maxAantal) {
+        // verdeel het mandelgetal (value) over 16 verschillende kleuren
         int colornr = value % 16;
         switch(colornr) {
             case 0: {
+                // rgb(66, 30, 15)
                 kleur[0] = 66;
                 kleur[1] = 30;
                 kleur[2] = 15;
                 break;
             }
             case 1: {
+                // rgb(25, 7, 26)
                 kleur[0] = 25;
                 kleur[1] = 7;
                 kleur[2] = 26;
@@ -292,6 +295,7 @@ void SetColor(int value) {
 
             }
             case 2: {
+                // rgb(9, 1, 47)
                 kleur[0] = 9;
                 kleur[1] = 1;
                 kleur[2] = 47;
@@ -299,6 +303,7 @@ void SetColor(int value) {
 
             }
             case 3: {
+                // rgb(4, 4, 73)
                 kleur[0] = 4;
                 kleur[1] = 4;
                 kleur[2] = 73;
@@ -306,6 +311,7 @@ void SetColor(int value) {
 
             }
             case 4: {
+                // rgb( 12, 44, 138)
                 kleur[0] = 12;
                 kleur[1] = 44;
                 kleur[2] = 138;
@@ -313,6 +319,7 @@ void SetColor(int value) {
 
             }
             case 5: {
+                // rgb(12, 44, 138)
                 kleur[0] = 12;
                 kleur[1] = 44;
                 kleur[2] = 138;
@@ -320,6 +327,7 @@ void SetColor(int value) {
 
             }
             case 6: {
+                // rgb(24, 82, 177)
                 kleur[0] = 24;
                 kleur[1] = 82;
                 kleur[2] = 177;
@@ -327,6 +335,7 @@ void SetColor(int value) {
 
             }
             case 7: {
+                // rgb(57, 125, 209)
                 kleur[0] = 57;
                 kleur[1] = 125;
                 kleur[2] = 209;
@@ -395,7 +404,7 @@ void SetColor(int value) {
 }
 
 bool ValidateInputs(string middenX, string middenY, string schaal, string mAantal) {
-    //Validate if all inputs from user are valid for calculation
+    // Validate if all inputs from user are valid for calculation
     if (middenX == "" || middenY == "" || schaal == "" || mAantal == "") {
         return false;
     }
@@ -407,20 +416,20 @@ bool ValidateInputs(string middenX, string middenY, string schaal, string mAanta
 int calculateMandelBrotFromPoint(double x, double y){
 
     int teller = 0;
-    //variables
-    //mandelBrot A & B start at 0
+    // variables
+    // mandelBrot A & B start at 0
     double mandelBrotA = 0;
     double mandelBrotB = 0;
-    //Give a maximum to the calculation
+    // Give a maximum to the calculation
     
     for (int i = 0; i < maxAantal; i++)
     {
         if (CheckPythagoras(mandelBrotA, mandelBrotB, 0, 0))
         {
             double oldMandelBrotA = mandelBrotA;
-            //CalculateMandelGetalX
+            // CalculateMandelGetalX
             mandelBrotA = Math.Pow(mandelBrotA, 2) - Math.Pow(mandelBrotB, 2) + x;
-            //CalculateMandelGetalY
+            // CalculateMandelGetalY
             mandelBrotB = 2 * oldMandelBrotA * mandelBrotB + y;
             teller++;
         }
@@ -446,11 +455,13 @@ ImageBoxImage.MouseDoubleClick += ImageBoxImage_MouseDoubleClick;
 
 void ImageBoxImage_MouseDoubleClick(object sender, MouseEventArgs e)
 {
+    // als de muis dubbel is geklikt rekent hij uit wat de schaal, de x en de y coordinaten worden
     schaalInput.Text = (double.Parse(schaalInput.Text) / 2).ToString();
     middenXInput.Text = ((double.Parse(middenXInput.Text) + (e.X - 200) * double.Parse(schaalInput.Text))).ToString();
     middenYInput.Text = ((double.Parse(middenYInput.Text) + (e.Y - 200) * double.Parse(schaalInput.Text))).ToString();
 
     currentUndoPosition = 0;
+    // de functie IterateThroughPixels() zal de waarde van schaalInput.Text, etc gebruiken
     IterateTroughPixels(kleurZelfGekozen);
 }
 
@@ -464,6 +475,7 @@ schaalInput.KeyDown += Input_KeyDown;
 
 void Input_KeyDown(object sender, KeyEventArgs e)
 {
+    // roep de functie aan als je op enter hebt geklikt
     if (e.KeyCode == Keys.Enter) {
         IterateTroughPixels(kleurZelfGekozen);
     }
@@ -475,7 +487,7 @@ float map( float value, float leftMin, float leftMax, float rightMin, float righ
   return rightMin + ( value - leftMin ) * ( rightMax - rightMin ) / ( leftMax - leftMin );
 }
 
-//Undo button
+// Undo button
 undoBtn.Click += UndoBtn_Click;
 
 void UndoBtn_Click(object sender, EventArgs e)
@@ -500,7 +512,8 @@ dropdown.SelectedIndexChanged += Dropdown_SelectedIndexChanged;
 kleurDropDown.SelectedIndexChanged += kleurDropDown_SelectedIndexchanged;
 
 void kleurDropDown_SelectedIndexchanged(object sender, EventArgs e) {
-    // presetsKleur[kleurDropDown.SelectedIndex]
+    // hier kies je zelf de waarden van de randen van de mandelbrot
+    // deze worden in de functie IterateThroughPixel gemapt met de waarden van het mandelgetal
     if (presetsKleur[kleurDropDown.SelectedIndex] == "roze") {
         kleur[0] = 234;
         kleur[1] = 137;
