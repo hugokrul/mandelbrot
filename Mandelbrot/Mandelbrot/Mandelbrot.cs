@@ -2,6 +2,16 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Globalization;
+using System.Diagnostics;
+
+using System.IO;
+//Add Google sheet Apis (database)
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Sheets.v4;
+using Google.Apis.Sheets.v4.Data;
+//Add color because Google overwrites it by default
+using Color = System.Drawing.Color;
+using System.Collections.Generic;
 
 Form scherm = new Form();
 scherm.Text = "MandelBrot";
@@ -16,6 +26,14 @@ goBtn.BackColor = Color.White;
 Button undoBtn = new Button();
 undoBtn.Text = "Undo";
 undoBtn.BackColor = Color.White;
+
+Button savePresetBtn = new Button();
+savePresetBtn.Text = "Save";
+savePresetBtn.BackColor = Color.White;
+//Button deletePresetBtn = new Button();
+//deletePresetBtn.Text = "Delete";
+//deletePresetBtn.BackColor = Color.White;
+
 // Labels
 Label middenXLabel = new Label();
 middenXLabel.Text = "MiddenX";
@@ -44,12 +62,12 @@ int xOffset = 20;
 
 //Other
 ProgressBar progressBar = new ProgressBar();
-Panel inputsPanel = new Panel();
-Panel extrasPanel = new Panel();
-
 // Specify location of the elements
 goBtn.Location = new Point(250, 100);
 undoBtn.Location = new Point(310, 100);
+
+savePresetBtn.Location = new Point(340, 134);
+//deletePresetBtn.Location = new Point(395, 134);
 
 middenXLabel.Location = new Point(xOffset, 10);
 middenYLabel.Location = new Point(xOffset, 40);
@@ -66,12 +84,13 @@ dropdown.Location = new Point(110 + xOffset, 135);
 kleurDropDown.Location = new Point(390 + xOffset, 10);
 
 progressBar.Location = new Point(100, 580);
-inputsPanel.Location = new Point(10, 10);
-extrasPanel.Location = new Point(200, 10);
 
 // Specify Size of the Elements
 goBtn.Size = new Size(50, 25);
 undoBtn.Size = new Size(50, 25);
+
+savePresetBtn.Size = new Size(50, 25);
+//deletePresetBtn.Size = new Size(60, 25);
 
 middenXLabel.Size = new Size(100, 25);
 middenYLabel.Size = new Size(100, 25);
@@ -89,8 +108,6 @@ kleurDropDown.Size = new Size(180, 20);
 
 progressBar.Size = new Size(400, 20);
 progressBar.BackColor = Color.DarkGray;
-inputsPanel.Size = new Size(400, 180);
-extrasPanel.Size = new Size(400, 180);
 
 middenXInput.Text = "0";
 middenYInput.Text = "0";
@@ -111,6 +128,9 @@ dropdown.Items.AddRange(presets);
 scherm.Controls.Add(goBtn);
 scherm.Controls.Add(undoBtn);
 
+scherm.Controls.Add(savePresetBtn);
+//scherm.Controls.Add(deletePresetBtn);
+
 scherm.Controls.Add(middenXLabel);
 scherm.Controls.Add(middenYLabel);
 scherm.Controls.Add(schaalLabel);
@@ -126,8 +146,6 @@ scherm.Controls.Add(dropdown);
 scherm.Controls.Add(kleurDropDown);
 
 scherm.Controls.Add(progressBar);
-scherm.Controls.Add(inputsPanel);
-scherm.Controls.Add(extrasPanel);
 
 // Create Image Box
 Bitmap ImageBoxDrawing = new Bitmap(400, 400);
@@ -147,8 +165,8 @@ ImageBoxImage.BackColor = Color.White;
 ImageBoxImage.Image = ImageBoxDrawing;
 
 // UI improvements
-// scherm.BackColor = Color.Black;
-// scherm.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+ scherm.BackColor = Color.AntiqueWhite;
+ scherm.FormBorderStyle = FormBorderStyle.FixedDialog;
 // inputsPanel.BackColor = Color.DimGray;
 // extrasPanel.BackColor = Color.DimGray;
 
@@ -225,23 +243,25 @@ void IterateTroughPixels(string kleurZelfGekozen="kleur")
 
         ImageBoxImage.Invalidate();
         // loop trough every pixel width and make it between a range between -2 and 2
-        for (float i = 0; i <= imageSize; i++) {
+        for (float i = 0; i < imageSize; i++) {
             // Rows
             progressBar.Value = Convert.ToInt32((i / imageSize) * 100);
             // imageSize / 4 --> 400/4 = 100 --> i/100 gives range between -2 and 2
             // * schaal --> scretches image in both x and y to make it appear it is zoomed in
             double remappedPixelX = (-2 + (i / (imageSize/4)) + ((x/schaal) / (imageSize / 4))) * schaal;
-            for (float j = 0; j <= 400; j++)
+            for (float j = 0; j < 400; j++)
             {
                 // Columns
                 double remappedPixelY = (-2 + ((y /schaal) / (imageSize/4)) + (j / (imageSize / 4))) * schaal;
                 int mandelPointGetal = calculateMandelBrotFromPoint(remappedPixelX, remappedPixelY);
-                Brush pixelColor = Brushes.White;
+                //Brush pixelColor = Brushes.White;
+                Color color;
                 if (mandelPointGetal == maxAantal)
                 {
-                    pixelColor = Brushes.Black;
+                    //pixelColor = Brushes.Black;
+                    color = Color.Black;
                 } else {
-                    Color color;
+                    
                     if (kleurZelfGekozen == "kleur") {
                         // als je de voorgekozen kleur kist rekent hij met setColorKleur de kleur uit
                         SetColorKleur(mandelPointGetal);
@@ -267,10 +287,9 @@ void IterateTroughPixels(string kleurZelfGekozen="kleur")
                         color = Color.FromArgb(r, g, b);      
                     }
                     // hier maak je de brush aan met de gekozen kleur
-                    pixelColor = new SolidBrush(color);
+                    //pixelColor = new SolidBrush(color);
                 }
-
-                ImageBoxDrawer.FillRectangle(pixelColor, i, j, 1, 1);
+                ImageBoxDrawing.SetPixel((int)(i), (int)(j), color);
 
             }
 
@@ -527,11 +546,17 @@ ImageBoxImage.MouseDoubleClick += ImageBoxImage_MouseDoubleClick;
 ImageBoxImage.MouseClick += ImageBoxImage_MouseRichtClick;
 
 void ImageBoxImage_MouseRichtClick(object sender, MouseEventArgs e) {
+
+    CultureInfo ci = CultureInfo.CurrentCulture;
+    string replacee = ",";
+    string replacement = ".";
+    if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; }
+
     if (e.Button == System.Windows.Forms.MouseButtons.Right) {
         // als de rechtermuis is geklikt rekent hij uit wat de schaal, de x en de y coordinaten worden
-        schaalInput.Text = (double.Parse(schaalInput.Text) * 2).ToString();
-        middenXInput.Text = ((double.Parse(middenXInput.Text) + (e.X - 200) * double.Parse(schaalInput.Text))).ToString();
-        middenYInput.Text = ((double.Parse(middenYInput.Text) + (e.Y - 200) * double.Parse(schaalInput.Text))).ToString();
+        schaalInput.Text = (double.Parse(schaalInput.Text.Replace(replacee, replacement)) * 2).ToString();
+        middenXInput.Text = ((double.Parse(middenXInput.Text.Replace(replacee, replacement)) + (e.X - 200) * double.Parse(schaalInput.Text.Replace(replacee, replacement)))).ToString();
+        middenYInput.Text = ((double.Parse(middenYInput.Text.Replace(replacee, replacement)) + (e.Y - 200) * double.Parse(schaalInput.Text.Replace(replacee, replacement)))).ToString();
 
         currentUndoPosition = 0;
         // de functie IterateThroughPixels() zal de waarde van schaalInput.Text, etc gebruiken
@@ -542,9 +567,14 @@ void ImageBoxImage_MouseRichtClick(object sender, MouseEventArgs e) {
 void ImageBoxImage_MouseDoubleClick(object sender, MouseEventArgs e)
 {
     // als de muis dubbel is geklikt rekent hij uit wat de schaal, de x en de y coordinaten worden
-    schaalInput.Text = (double.Parse(schaalInput.Text) / 2).ToString();
-    middenXInput.Text = ((double.Parse(middenXInput.Text) + (e.X - 200) * double.Parse(schaalInput.Text))).ToString();
-    middenYInput.Text = ((double.Parse(middenYInput.Text) + (e.Y - 200) * double.Parse(schaalInput.Text))).ToString();
+    CultureInfo ci = CultureInfo.CurrentCulture;
+    string replacee = ",";
+    string replacement = ".";
+    if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; }
+
+    schaalInput.Text = (double.Parse(schaalInput.Text.Replace(replacee, replacement)) / 2).ToString();
+    middenXInput.Text = ((double.Parse(middenXInput.Text.Replace(replacee, replacement)) + (e.X - 200) * double.Parse(schaalInput.Text.Replace(replacee, replacement)))).ToString();
+    middenYInput.Text = ((double.Parse(middenYInput.Text.Replace(replacee, replacement)) + (e.Y - 200) * double.Parse(schaalInput.Text.Replace(replacee, replacement)))).ToString();
 
     currentUndoPosition = 0;
     // de functie IterateThroughPixels() zal de waarde van schaalInput.Text, etc gebruiken
@@ -643,5 +673,213 @@ void Dropdown_SelectedIndexChanged(object sender, EventArgs e)
     currentUndoPosition = 0;
     IterateTroughPixels(kleurZelfGekozen);
 }
+
+
+//=============DATABASE=================
+
+bool databaseEnabled = true;
+
+
+
+//authenticate
+
+string[] Scopes = { SheetsService.Scope.Spreadsheets };
+string ApplicationName = "Mandelbrot"; //GOOGLE SHEET NAME --> DO NOT CHANGE
+string SpreadsheetId = "1J1m0vFLmtPdknE6-NqQwQxenV1rqXHS7N_3rBAFBGmc"; //GOOGLE SHEET ID (URL)
+string sheet = "Presets"; //Shown in lower tabs of Google Sheets
+SheetsService service = null;
+
+
+ConnectToDatabase();
+
+//FOR MORE INFORMATION ABOUT THE SHEET USED AND ACCESS TO IT: https://docs.google.com/spreadsheets/d/1J1m0vFLmtPdknE6-NqQwQxenV1rqXHS7N_3rBAFBGmc/edit?usp=sharing
+
+
+
+void ConnectToDatabase()
+{
+    try
+    {
+        GoogleCredential credential;
+        using (var stream = new FileStream("client_secrets.json", FileMode.Open, FileAccess.Read))
+        {
+            credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+        }
+
+
+        service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
+        {
+            HttpClientInitializer = credential,
+            ApplicationName = ApplicationName
+        });
+
+        //call first time to initialize the presets into the dropdown
+        ReadTemplates();
+    }
+    catch {
+        MessageBox.Show("Database connection was not successfull because you don't have the credentials on your device. This feature will be disabled for now");
+        databaseEnabled = false;
+    }
+}
+
+void ReadTemplates() {
+    //database is not disabled, so create new presetLists
+    string[] presetsPre = {  };
+    string[] middenXPresetsPre = {  };
+    string[] middenYPresetsPre = {  };
+    string[] schaalPresetsPre = {  };
+
+    //setup range of where to read
+    string sheetRange = "A2:D";
+    var range = $"{sheet}!{sheetRange}";
+
+    //make request, get response from range and store it in values
+    var request = service.Spreadsheets.Values.Get(SpreadsheetId, range);
+    var response = request.Execute();
+    var values = response.Values;
+
+    if (values != null && values.Count > 0)
+    {
+        foreach (var row in values)
+        {
+            if (row[0] != null)
+            {
+                //Column 0 = presetName, 1 = midX, 2 = midY, 3 = scale
+                string presetName = row[0].ToString();
+                string midX = row[1].ToString();
+                string midY = row[2].ToString();
+                string scale = row[3].ToString();
+
+                Debug.WriteLine(presetsPre.Length);
+
+                //push each value to local array
+                Array.Resize(ref presetsPre, presetsPre.Length + 1);
+                presetsPre[presetsPre.Length - 1] = presetName;
+                Array.Resize(ref middenXPresetsPre, middenXPresetsPre.Length + 1);
+                middenXPresetsPre[middenXPresetsPre.Length - 1] = midX;
+                Array.Resize(ref middenYPresetsPre, middenYPresetsPre.Length + 1);
+                middenYPresetsPre[middenYPresetsPre.Length - 1] = midY;
+                Array.Resize(ref schaalPresetsPre, schaalPresetsPre.Length + 1);
+                schaalPresetsPre[schaalPresetsPre.Length - 1] = scale;
+
+                //add to ui element
+                presets = presetsPre;
+                middenXPresets = middenXPresetsPre;
+                middenYPresets = middenYPresetsPre;
+                schaalPresets = schaalPresetsPre;
+
+                dropdown.Items.Clear();
+                dropdown.Items.AddRange(presetsPre);
+            } else { break; }
+        }
+    }
+}
+
+int GetLastRowOfRange(string sheetRange)
+{
+    int lastRow = 2; //start at row 2, (not index 2)
+    var range = $"{sheet}!{sheetRange}";
+    var request = service.Spreadsheets.Values.Get(SpreadsheetId, range);
+
+    var response = request.Execute();
+    var values = response.Values;
+    if (values != null && values.Count > 0)
+    {
+
+        //ROWS
+        foreach (var row in values)
+        {
+            try
+            {
+                lastRow += 1;
+            }
+            catch
+            {
+                MessageBox.Show("The range is not defined", "There was an error");
+            }
+
+        }
+        return lastRow;
+    }
+    else
+    {
+        Console.WriteLine("No Data Was Found.");
+        return 0;
+    }
+}
+
+void UpdateEntry(string sheetRange, string objectToUpdate)
+{
+    var range = $"{sheet}!{sheetRange}";
+    var valueRange = new ValueRange();
+
+    var objectList = new List<object>() { { objectToUpdate } };
+    valueRange.Values = new List<IList<object>> { objectList };
+
+    var updateRequest = service.Spreadsheets.Values.Update(valueRange, SpreadsheetId, range);
+    updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+    var updateResponse = updateRequest.Execute();
+
+}
+
+void DeleteEntry(string sheetRange)
+{
+    var range = $"{sheet}!{sheetRange}";
+    var requestBody = new ClearValuesRequest();
+
+    var deleteRequest = service.Spreadsheets.Values.Clear(requestBody, SpreadsheetId, range);
+    var deleteResponse = deleteRequest.Execute();
+}
+
+
+//Database Buttons
+
+savePresetBtn.Click += SavePresetBtn_Click;
+
+void SavePresetBtn_Click(object sender, EventArgs e)
+{
+
+    if (databaseEnabled)
+    {
+        if (ValidateInputs(middenXInput.Text, middenYInput.Text, schaalInput.Text, maxAantalInput.Text))
+        {
+            string nextRow = GetLastRowOfRange("A2:D").ToString();
+            UpdateEntry("A" + nextRow, dropdown.Text);
+            UpdateEntry("B" + nextRow, middenXInput.Text);
+            UpdateEntry("C" + nextRow, middenYInput.Text);
+            UpdateEntry("D" + nextRow, schaalInput.Text);
+
+            MessageBox.Show("Preset successfully added to database!");
+            ReadTemplates();
+        }
+    }
+    else
+    {
+        MessageBox.Show("Database disabled");
+    }
+}
+
+/*deletePresetBtn.Click += DeletePresetBtn_Click;
+
+void DeletePresetBtn_Click(object sender, EventArgs e)
+{
+    if (databaseEnabled)
+    {
+        if (ValidateInputs(middenXInput.Text, middenYInput.Text, schaalInput.Text, maxAantalInput.Text))
+        {
+            string rowToDelete = (dropdown.TabIndex + 2).ToString(); //+2 to correct for index and first unavailable row
+            DeleteEntry("A" + rowToDelete);
+
+            MessageBox.Show("Preset successfully deleted to database!");
+            ReadTemplates();
+
+        }
+    }
+    else
+    {
+        MessageBox.Show("Database disabled");
+    }
+}*/
+
 
 Application.Run(scherm);
