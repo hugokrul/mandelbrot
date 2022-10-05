@@ -247,7 +247,7 @@ void IterateTroughPixels(string kleurZelfGekozen="kleur")
                         SetColorKleur(mandelPointGetal);
                         color = Color.FromArgb(kleur[0], kleur[1], kleur[2]);      
                     } else if (kleurZelfGekozen == "zwartwit") {
-                        if (mandelPointGetal == maxAantal || mandelPointGetal % 2 == 0) {
+                        if (mandelPointGetal % 2 == 0) {
                             color = Color.Black;
                         } else {
                             color = Color.White;
@@ -288,13 +288,21 @@ void SetKleurRegenboog(int value) {
         int colornr = value % 7;
         switch(colornr) {
             case 0: {
+                // rgb(127, 0, 255)
+                kleur[0] = 127;
+                kleur[1] = 0;
+                kleur[2] = 255;
+                break;
+
+            }
+            case 1: {
                 // rgb(255, 0, 0)
                 kleur[0] = 255;
                 kleur[1] = 0;
                 kleur[2] = 0;
                 break;
             }
-            case 1: {
+            case 2: {
                 // rgb(255, 165, 0)
                 kleur[0] = 255;
                 kleur[1] = 165;
@@ -302,7 +310,7 @@ void SetKleurRegenboog(int value) {
                 break;
 
             }
-            case 2: {
+            case 3: {
                 // rgb(255, 255, 0)
                 kleur[0] = 255;
                 kleur[1] = 255;
@@ -310,7 +318,7 @@ void SetKleurRegenboog(int value) {
                 break;
 
             }
-            case 3: {
+            case 4: {
                 // rgb(0, 255, 0)
                 kleur[0] = 0;
                 kleur[1] = 255;
@@ -318,7 +326,7 @@ void SetKleurRegenboog(int value) {
                 break;
 
             }
-            case 4: {
+            case 5: {
                 // rgb(0, 0, 255)
                 kleur[0] = 0;
                 kleur[1] = 0;
@@ -326,19 +334,11 @@ void SetKleurRegenboog(int value) {
                 break;
 
             }
-            case 5: {
+            case 6: {
                 // rgb(75, 0, 130)
                 kleur[0] = 75;
                 kleur[1] = 0;
                 kleur[2] = 130;
-                break;
-
-            }
-            case 6: {
-                // rgb(127, 0, 255)
-                kleur[0] = 127;
-                kleur[1] = 0;
-                kleur[2] = 255;
                 break;
 
             }
