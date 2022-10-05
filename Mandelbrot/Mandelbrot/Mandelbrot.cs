@@ -97,7 +97,7 @@ middenYInput.Text = "0";
 schaalInput.Text = "1";
 maxAantalInput.Text = "100";
 
-string[] presetsKleur = {"roze", "groen", "rood", "wit", "kleuren"};
+string[] presetsKleur = {"roze", "groen", "rood", "wit", "kleuren", "regenboog", "zwart wit"};
 string[] presets = {"Spiraal", "Mandelbrot in mandelbrot", "Basis plaatje"};
 string[] middenXPresets = { "36.98388671875", "-59.815625", "0" };
 string[] middenYPresets = { "-67.1396484375", "-66.23906249999999", "0" };
@@ -182,7 +182,7 @@ string[] savedMiddenYInput = { "0" };
 string[] savedSchaalInput = { "1" };
 string[] savedMaxAantalInput = { "100" };
 int currentUndoPosition = 0;
-bool kleurZelfGekozen = false;
+string kleurZelfGekozen = "kleur";
 
 // button event
 goBtn.Click += GoBtn_Click;
@@ -192,7 +192,7 @@ void GoBtn_Click(object sender, EventArgs e)
     IterateTroughPixels(kleurZelfGekozen);
 }
 
-void IterateTroughPixels(bool kleurZelfGekozen=false)
+void IterateTroughPixels(string kleurZelfGekozen="kleur")
 {
     if (ValidateInputs(middenXInput.Text, middenYInput.Text, schaalInput.Text, maxAantalInput.Text))
     {
@@ -242,7 +242,20 @@ void IterateTroughPixels(bool kleurZelfGekozen=false)
                     pixelColor = Brushes.Black;
                 } else {
                     Color color;
-                    if (kleurZelfGekozen) {
+                    if (kleurZelfGekozen == "kleur") {
+                        // als je de voorgekozen kleur kist rekent hij met setColorKleur de kleur uit
+                        SetColorKleur(mandelPointGetal);
+                        color = Color.FromArgb(kleur[0], kleur[1], kleur[2]);      
+                    } else if (kleurZelfGekozen == "zwartwit") {
+                        if (mandelPointGetal == maxAantal || mandelPointGetal % 2 == 0) {
+                            color = Color.Black;
+                        } else {
+                            color = Color.White;
+                        }
+                    } else if (kleurZelfGekozen == "regenboog") {
+                        SetKleurRegenboog(mandelPointGetal);
+                        color = Color.FromArgb(kleur[0], kleur[1], kleur[2]);
+                    } else {
                         /*  
                         hij mapt hier het mandelgetal naar de aangewezen kleur
                         op het moment dat je rood kiest verdeelt hij het mandelgetal (bijvoorbeeld 50) naar de range 0 tot 255
@@ -252,11 +265,6 @@ void IterateTroughPixels(bool kleurZelfGekozen=false)
                         int g = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[1]));
                         int b = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[2]));
                         color = Color.FromArgb(r, g, b);      
-                    } else {
-                        // als je de voorgekozen kleur kist rekent hij met setcolor de kleur uit
-                        SetColor(mandelPointGetal);
-                        color = Color.FromArgb(kleur[0], kleur[1], kleur[2]);      
-
                     }
                     // hier maak je de brush aan met de gekozen kleur
                     pixelColor = new SolidBrush(color);
@@ -274,7 +282,71 @@ void IterateTroughPixels(bool kleurZelfGekozen=false)
     }
 }
 
-void SetColor(int value) {
+void SetKleurRegenboog(int value) {
+    if (value != maxAantal) {
+        // verdeel het mandelgetal (value) over 16 verschillende kleuren
+        int colornr = value % 7;
+        switch(colornr) {
+            case 0: {
+                // rgb(255, 0, 0)
+                kleur[0] = 255;
+                kleur[1] = 0;
+                kleur[2] = 0;
+                break;
+            }
+            case 1: {
+                // rgb(255, 165, 0)
+                kleur[0] = 255;
+                kleur[1] = 165;
+                kleur[2] = 0;
+                break;
+
+            }
+            case 2: {
+                // rgb(255, 255, 0)
+                kleur[0] = 255;
+                kleur[1] = 255;
+                kleur[2] = 0;
+                break;
+
+            }
+            case 3: {
+                // rgb(0, 255, 0)
+                kleur[0] = 0;
+                kleur[1] = 255;
+                kleur[2] = 0;
+                break;
+
+            }
+            case 4: {
+                // rgb(0, 0, 255)
+                kleur[0] = 0;
+                kleur[1] = 0;
+                kleur[2] = 255;
+                break;
+
+            }
+            case 5: {
+                // rgb(75, 0, 130)
+                kleur[0] = 75;
+                kleur[1] = 0;
+                kleur[2] = 130;
+                break;
+
+            }
+            case 6: {
+                // rgb(127, 0, 255)
+                kleur[0] = 127;
+                kleur[1] = 0;
+                kleur[2] = 255;
+                break;
+
+            }
+        }
+    }
+}
+
+void SetColorKleur(int value) {
     if (value != maxAantal) {
         // verdeel het mandelgetal (value) over 16 verschillende kleuren
         int colornr = value % 16;
@@ -532,27 +604,31 @@ void kleurDropDown_SelectedIndexchanged(object sender, EventArgs e) {
         kleur[0] = 234;
         kleur[1] = 137;
         kleur[2] = 154;
-        kleurZelfGekozen = true;
+        kleurZelfGekozen = "ja";
     } else if (presetsKleur[kleurDropDown.SelectedIndex] == "groen") {
         kleur[0] = 0;
         kleur[1] = 255;
         kleur[2] = 0;
-        kleurZelfGekozen = true;
+        kleurZelfGekozen = "ja";
     } else if (presetsKleur[kleurDropDown.SelectedIndex] == "rood") {
         kleur[0] = 255;
         kleur[1] = 0;
         kleur[2] = 0;
-        kleurZelfGekozen = true;
+        kleurZelfGekozen = "ja";
     } else if (presetsKleur[kleurDropDown.SelectedIndex] == "wit") {
         kleur[0] = 255;
         kleur[1] = 255;
         kleur[2] = 255;
-        kleurZelfGekozen = true;
+        kleurZelfGekozen = "ja";
     } else if (presetsKleur[kleurDropDown.SelectedIndex] == "kleuren") {
         kleur[0] = 255;
         kleur[1] = 255;
         kleur[2] = 255;
-        kleurZelfGekozen = false;
+        kleurZelfGekozen = "kleur";
+    } else if (presetsKleur[kleurDropDown.SelectedIndex] == "zwart wit") {
+        kleurZelfGekozen = "zwartwit";
+    } else if (presetsKleur[kleurDropDown.SelectedIndex] == "regenboog") {
+        kleurZelfGekozen = "regenboog";
     }
 
     currentUndoPosition = 0;
