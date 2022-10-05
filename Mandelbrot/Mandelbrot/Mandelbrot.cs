@@ -215,8 +215,8 @@ void IterateTroughPixels(string kleurZelfGekozen="kleur")
 
         // Replace , to work on all computers, add culture to correct for system language
         CultureInfo ci = CultureInfo.CurrentCulture;
-        string replacee = "~";
-        string replacement = "~";
+        string replacee = ",";
+        string replacement = ".";
         if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; } 
         float x = float.Parse(middenXInput.Text.Replace(replacee, replacement));
         float y = float.Parse(middenYInput.Text.Replace(replacee, replacement));
