@@ -844,10 +844,14 @@ void SavePresetBtn_Click(object sender, EventArgs e)
         if (ValidateInputs(middenXInput.Text, middenYInput.Text, schaalInput.Text, maxAantalInput.Text))
         {
             string nextRow = GetLastRowOfRange("A2:D").ToString();
-            UpdateEntry("A" + nextRow, dropdown.Text);
-            UpdateEntry("B" + nextRow, middenXInput.Text);
-            UpdateEntry("C" + nextRow, middenYInput.Text);
-            UpdateEntry("D" + nextRow, schaalInput.Text);
+            string replacee = ",";
+            string replacement = ".";
+            CultureInfo ci = CultureInfo.CurrentCulture;
+            if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; }
+            UpdateEntry("A" + nextRow, dropdown.Text.Replace(replacee, replacement));
+            UpdateEntry("B" + nextRow, middenXInput.Text.Replace(replacee, replacement));
+            UpdateEntry("C" + nextRow, middenYInput.Text.Replace(replacee, replacement));
+            UpdateEntry("D" + nextRow, schaalInput.Text.Replace(replacee, replacement));
 
             MessageBox.Show("Preset successfully added to database!");
             ReadTemplates();
