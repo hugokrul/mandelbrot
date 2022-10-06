@@ -2,15 +2,13 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Globalization;
-// Updated upstream
-using System.Diagnostics;
 
 using System.IO;
-//Add Google sheet Apis (database)
+// Add Google sheet Apis (database)
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-//Add color because Google overwrites it by default
+// Add color because Google overwrites it by default
 using Color = System.Drawing.Color;
 using System.Collections.Generic;
 
@@ -31,9 +29,6 @@ undoBtn.BackColor = Color.White;
 Button savePresetBtn = new Button();
 savePresetBtn.Text = "Save";
 savePresetBtn.BackColor = Color.White;
-//Button deletePresetBtn = new Button();
-//deletePresetBtn.Text = "Delete";
-//deletePresetBtn.BackColor = Color.White;
 
 // Labels
 Label middenXLabel = new Label();
@@ -57,18 +52,24 @@ TextBox maxAantalInput = new TextBox();
 ComboBox dropdown = new ComboBox();
 ComboBox kleurDropDown = new ComboBox();
 
-// zet de variabelen
+// Set some variables
 int[] kleur = {128, 128, 128};
 int xOffset = 20;
+int maxAantal = 100;
+string[] savedMiddenXInput = { "0" };
+string[] savedMiddenYInput = { "0" };
+string[] savedSchaalInput = { "1" };
+string[] savedMaxAantalInput = { "100" };
+int currentUndoPosition = 0;
+string kleurZelfGekozen = "kleur";
 
-//Other
+// define a progressbar
 ProgressBar progressBar = new ProgressBar();
 // Specify location of the elements
 goBtn.Location = new Point(250, 100);
 undoBtn.Location = new Point(310, 100);
 
 savePresetBtn.Location = new Point(340, 134);
-//deletePresetBtn.Location = new Point(395, 134);
 
 middenXLabel.Location = new Point(xOffset, 10);
 middenYLabel.Location = new Point(xOffset, 40);
@@ -89,9 +90,7 @@ progressBar.Location = new Point(100, 580);
 // Specify Size of the Elements
 goBtn.Size = new Size(50, 25);
 undoBtn.Size = new Size(50, 25);
-
 savePresetBtn.Size = new Size(50, 25);
-//deletePresetBtn.Size = new Size(60, 25);
 
 middenXLabel.Size = new Size(100, 25);
 middenYLabel.Size = new Size(100, 25);
@@ -115,6 +114,7 @@ middenYInput.Text = "0";
 schaalInput.Text = "1";
 maxAantalInput.Text = "100";
 
+// If the database doesn't work
 string[] presetsKleur = {"roze", "groen", "rood", "wit", "kleuren", "regenboog", "zwart wit"};
 string[] presets = {"Spiraal", "Mandelbrot in mandelbrot", "Basis plaatje"};
 string[] middenXPresets = { "36.98388671875", "-59.815625", "0" };
@@ -130,7 +130,6 @@ scherm.Controls.Add(goBtn);
 scherm.Controls.Add(undoBtn);
 
 scherm.Controls.Add(savePresetBtn);
-//scherm.Controls.Add(deletePresetBtn);
 
 scherm.Controls.Add(middenXLabel);
 scherm.Controls.Add(middenYLabel);
@@ -166,11 +165,10 @@ ImageBoxImage.BackColor = Color.White;
 ImageBoxImage.Image = ImageBoxDrawing;
 
 // UI improvements
- scherm.BackColor = Color.AntiqueWhite;
- scherm.FormBorderStyle = FormBorderStyle.FixedDialog;
-// inputsPanel.BackColor = Color.DimGray;
-// extrasPanel.BackColor = Color.DimGray;
+scherm.BackColor = Color.AntiqueWhite;
+scherm.FormBorderStyle = FormBorderStyle.FixedDialog;
 
+// Make a new font and add that to the labels
 Font font = new Font("Montserrat", 10, FontStyle.Bold);
 middenXLabel.Font = font;
 middenYLabel.Font = font;
@@ -191,18 +189,6 @@ maxAantalLabel.TextAlign = ContentAlignment.MiddleLeft;
 dropdownLabel.TextAlign = ContentAlignment.MiddleLeft;
 kleurLabel.TextAlign = ContentAlignment.MiddleLeft;
 
-
-
-// variables
-int maxAantal = 100;
-
-string[] savedMiddenXInput = { "0" };
-string[] savedMiddenYInput = { "0" };
-string[] savedSchaalInput = { "1" };
-string[] savedMaxAantalInput = { "100" };
-int currentUndoPosition = 0;
-string kleurZelfGekozen = "kleur";
-
 // button event
 goBtn.Click += GoBtn_Click;
 void GoBtn_Click(object sender, EventArgs e)
@@ -211,6 +197,7 @@ void GoBtn_Click(object sender, EventArgs e)
     IterateTroughPixels(kleurZelfGekozen);
 }
 
+// The function that goes through all the pixels and assigns a color to them
 void IterateTroughPixels(string kleurZelfGekozen="kleur")
 {
     if (ValidateInputs(middenXInput.Text, middenYInput.Text, schaalInput.Text, maxAantalInput.Text))
@@ -233,13 +220,13 @@ void IterateTroughPixels(string kleurZelfGekozen="kleur")
         }
 
         // Replace , to work on all computers, add culture to correct for system language
-         CultureInfo ci = CultureInfo.CurrentCulture;
-         string replacee = ",";
-         string replacement = ".";
-         if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; } 
-         float x = float.Parse(middenXInput.Text.Replace(replacee, replacement));
+        CultureInfo ci = CultureInfo.CurrentCulture;
+        string replacee = ",";
+        string replacement = ".";
+        if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; } 
+        float x = float.Parse(middenXInput.Text.Replace(replacee, replacement));
         float y = float.Parse(middenYInput.Text.Replace(replacee, replacement));
-         float schaal = float.Parse(schaalInput.Text.Replace(replacee, replacement));
+        float schaal = float.Parse(schaalInput.Text.Replace(replacee, replacement));
 
 
         ImageBoxImage.Invalidate();
@@ -264,16 +251,18 @@ void IterateTroughPixels(string kleurZelfGekozen="kleur")
                 } else {
                     
                     if (kleurZelfGekozen == "kleur") {
-                        // als je de voorgekozen kleur kist rekent hij met setColorKleur de kleur uit
+                        // if you choose the default colors it calculates them with the setcolorkleur function
                         SetColorKleur(mandelPointGetal);
                         color = Color.FromArgb(kleur[0], kleur[1], kleur[2]);      
                     } else if (kleurZelfGekozen == "zwartwit") {
+                        // this will assign black to even mandelnumbers and white to odd mandelnumbers
                         if (mandelPointGetal % 2 == 0) {
                             color = Color.Black;
                         } else {
                             color = Color.White;
                         }
                     } else if (kleurZelfGekozen == "regenboog") {
+                        // this will calculate the color with the setkleurregenboog function
                         SetKleurRegenboog(mandelPointGetal);
                         color = Color.FromArgb(kleur[0], kleur[1], kleur[2]);
                     } else {
@@ -282,18 +271,23 @@ void IterateTroughPixels(string kleurZelfGekozen="kleur")
                         op het moment dat je rood kiest verdeelt hij het mandelgetal (bijvoorbeeld 50) naar de range 0 tot 255
                         dus als het mandelgetal = maxAantal zal de kleur van de pixel 255 zijn en hoe lager het mandelgetal hoe lager de waarde van de kleur
                         */
+
+                        /* 
+                        This will map the mandelnumber to an assigned color
+                        the mandelnumber ranges between 0 and maxAantal
+                        lets say the color is (255, 128, 150)
+                        so if the mandelnumber is maxaantal, it will be assigned (255, 128, 150)
+                        and if its less the value will be appropriatly stretched
+                        */
                         int r = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[0]));
                         int g = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[1]));
                         int b = Convert.ToInt32(map(mandelPointGetal, 0, maxAantal, 0, kleur[2]));
                         color = Color.FromArgb(r, g, b);      
                     }
-                    // hier maak je de brush aan met de gekozen kleur
-                    //pixelColor = new SolidBrush(color);
                 }
+                // set the pixel with x=i en y=j with the color just calculated
                 ImageBoxDrawing.SetPixel((int)(i), (int)(j), color);
-
             }
-
         }
     }
     else
@@ -304,7 +298,7 @@ void IterateTroughPixels(string kleurZelfGekozen="kleur")
 
 void SetKleurRegenboog(int value) {
     if (value != maxAantal) {
-        // verdeel het mandelgetal (value) over 16 verschillende kleuren
+        // divide the mandelnumber (value) in 7 for the 7 different colors of the rainbow
         int colornr = value % 7;
         switch(colornr) {
             case 0: {
@@ -366,6 +360,8 @@ void SetKleurRegenboog(int value) {
     }
 }
 
+// the function interpolation calculates the average of two different colors
+// it receives two list with [0] = the r value [1] = the g value and [2] = the b value
 int[] interpolation(int[] kleur1, int[] kleur2) {
     int[] returnKleur = {0,0,0};
 
@@ -381,7 +377,7 @@ int[] interpolation(int[] kleur1, int[] kleur2) {
 
 void SetColorKleur(int value) {
     if (value != maxAantal) {
-        // verdeel het mandelgetal (value) over 31 verschillende kleuren
+        // divide the mandelnumber (value) over 32 different colors
         int colornr = value % 31;
         switch(colornr) {
             case 0: {
@@ -392,7 +388,7 @@ void SetColorKleur(int value) {
                 break;
             }
             case 1: {
-                // om een zachtere overgang tussen de kleuren te krijgen rekent interpolation het gemiddelde van de twee kleuren uit
+                // to make sure for a smoother transition the 16 main colors are compared and divided with the interpolation function
                 int[] kleur1 = {66, 30, 15};
                 int[] kleur2 = {25, 7, 26};
                 kleur = interpolation(kleur1, kleur2);
@@ -646,6 +642,7 @@ bool CheckPythagoras(double ax, double ay, double bx, double by)
 {
     // Check if distance between 2 points < 2, return bool
     double sqrt = Math.Pow((ax-bx), 2) + Math.Pow((ay-by), 2);   
+    // the math.sqrt function takes time so for improvement we choose to make sure its les then 4 because sqrt(4) = 2
     return true ? sqrt < 4 : false;
 }
 
@@ -661,37 +658,33 @@ void ImageBoxImage_MouseRichtClick(object sender, MouseEventArgs e) {
     if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; }
 
     if (e.Button == System.Windows.Forms.MouseButtons.Right) {
-        // als de rechtermuis is geklikt rekent hij uit wat de schaal, de x en de y coordinaten worden
+        // if you click with your right mouse button
         schaalInput.Text = (double.Parse(schaalInput.Text.Replace(replacee, replacement)) * 2).ToString();
         middenXInput.Text = ((double.Parse(middenXInput.Text.Replace(replacee, replacement)) + (e.X - 200) * double.Parse(schaalInput.Text.Replace(replacee, replacement)))).ToString();
         middenYInput.Text = ((double.Parse(middenYInput.Text.Replace(replacee, replacement)) + (e.Y - 200) * double.Parse(schaalInput.Text.Replace(replacee, replacement)))).ToString();
 
         currentUndoPosition = 0;
-        // de functie IterateThroughPixels() zal de waarde van schaalInput.Text, etc gebruiken
         IterateTroughPixels(kleurZelfGekozen);
     }
 }
 
 void ImageBoxImage_MouseDoubleClick(object sender, MouseEventArgs e)
 {
-    // als de muis dubbel is geklikt rekent hij uit wat de schaal, de x en de y coordinaten worden
     CultureInfo ci = CultureInfo.CurrentCulture;
     string replacee = ",";
     string replacement = ".";
     if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; }
 
+    // if you double click it calculates the x, y and scale
     schaalInput.Text = (double.Parse(schaalInput.Text.Replace(replacee, replacement)) / 2).ToString();
     middenXInput.Text = ((double.Parse(middenXInput.Text.Replace(replacee, replacement)) + (e.X - 200) * double.Parse(schaalInput.Text.Replace(replacee, replacement)))).ToString();
     middenYInput.Text = ((double.Parse(middenYInput.Text.Replace(replacee, replacement)) + (e.Y - 200) * double.Parse(schaalInput.Text.Replace(replacee, replacement)))).ToString();
 
     currentUndoPosition = 0;
-    // de functie IterateThroughPixels() zal de waarde van schaalInput.Text, etc gebruiken
     IterateTroughPixels(kleurZelfGekozen);
 }
 
-//features
-
-//enter on inputs
+// check for keydowns for all inputs
 maxAantalInput.KeyDown += Input_KeyDown;
 middenXInput.KeyDown += Input_KeyDown;
 middenYInput.KeyDown += Input_KeyDown;
@@ -699,13 +692,13 @@ schaalInput.KeyDown += Input_KeyDown;
 
 void Input_KeyDown(object sender, KeyEventArgs e)
 {
-    // roep de functie aan als je op enter hebt geklikt
+    // call the function
     if (e.KeyCode == Keys.Enter) {
         IterateTroughPixels(kleurZelfGekozen);
     }
 }
 
-// map functie mapt een value uit een range[leftmin, leftmax] naar een andere range[rightmin, rightmax]
+// the map function calculates the respective value from two different ranges of numbers.
 float map( float value, float leftMin, float leftMax, float rightMin, float rightMax )
 {
   return rightMin + ( value - leftMin ) * ( rightMax - rightMin ) / ( leftMax - leftMin );
@@ -736,8 +729,8 @@ dropdown.SelectedIndexChanged += Dropdown_SelectedIndexChanged;
 kleurDropDown.SelectedIndexChanged += kleurDropDown_SelectedIndexchanged;
 
 void kleurDropDown_SelectedIndexchanged(object sender, EventArgs e) {
-    // hier kies je zelf de waarden van de randen van de mandelbrot
-    // deze worden in de functie IterateThroughPixel gemapt met de waarden van het mandelgetal
+    // for these presets you can choose the color of the edge of the mandelbrot yoursel
+    // the kleur variable will be used by the iteratethroughpixel function
     if (presetsKleur[kleurDropDown.SelectedIndex] == "roze") {
         kleur[0] = 234;
         kleur[1] = 137;
@@ -806,28 +799,21 @@ ConnectToDatabase();
 
 void ConnectToDatabase()
 {
-    // try
-    // {
-        GoogleCredential credential;
-        using (var stream = new FileStream("client_secrets.json", FileMode.Open, FileAccess.Read))
-        {
-            credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
-        }
+    GoogleCredential credential;
+    using (var stream = new FileStream("client_secrets.json", FileMode.Open, FileAccess.Read))
+    {
+        credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+    }
 
 
-        service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
-        {
-            HttpClientInitializer = credential,
-            ApplicationName = ApplicationName
-        });
+    service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
+    {
+        HttpClientInitializer = credential,
+        ApplicationName = ApplicationName
+    });
 
-        //call first time to initialize the presets into the dropdown
-        ReadTemplates();
-    // }
-    // catch {
-    //     MessageBox.Show("Database connection was not successfull because you don't have the credentials on your device. This feature will be disabled for now");
-    //     databaseEnabled = false;
-    // }
+    //call first time to initialize the presets into the dropdown
+    ReadTemplates();
 }
 
 void ReadTemplates() {
@@ -857,8 +843,6 @@ void ReadTemplates() {
                 string midX = row[1].ToString();
                 string midY = row[2].ToString();
                 string scale = row[3].ToString();
-
-                Debug.WriteLine(presetsPre.Length);
 
                 //push each value to local array
                 Array.Resize(ref presetsPre, presetsPre.Length + 1);
@@ -930,16 +914,6 @@ void UpdateEntry(string sheetRange, string objectToUpdate)
 
 }
 
-void DeleteEntry(string sheetRange)
-{
-    var range = $"{sheet}!{sheetRange}";
-    var requestBody = new ClearValuesRequest();
-
-    var deleteRequest = service.Spreadsheets.Values.Clear(requestBody, SpreadsheetId, range);
-    var deleteResponse = deleteRequest.Execute();
-}
-
-
 //Database Buttons
 
 savePresetBtn.Click += SavePresetBtn_Click;
@@ -970,28 +944,5 @@ void SavePresetBtn_Click(object sender, EventArgs e)
         MessageBox.Show("Database disabled");
     }
 }
-
-/*deletePresetBtn.Click += DeletePresetBtn_Click;
-
-void DeletePresetBtn_Click(object sender, EventArgs e)
-{
-    if (databaseEnabled)
-    {
-        if (ValidateInputs(middenXInput.Text, middenYInput.Text, schaalInput.Text, maxAantalInput.Text))
-        {
-            string rowToDelete = (dropdown.TabIndex + 2).ToString(); //+2 to correct for index and first unavailable row
-            DeleteEntry("A" + rowToDelete);
-
-            MessageBox.Show("Preset successfully deleted to database!");
-            ReadTemplates();
-
-        }
-    }
-    else
-    {
-        MessageBox.Show("Database disabled");
-    }
-}*/
-
 
 Application.Run(scherm);
