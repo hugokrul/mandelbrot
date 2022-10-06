@@ -35,3 +35,10 @@ C:\Users\koenv\Documents\Projects\UU\Mandelbrot\mandelbrot\Mandelbrot\Mandelbrot
 C:\Users\koenv\Documents\Projects\UU\Mandelbrot\mandelbrot\Mandelbrot\Mandelbrot\bin\Debug\net6.0-windows\Google.Apis.Sheets.v4.dll
 C:\Users\koenv\Documents\Projects\UU\Mandelbrot\mandelbrot\Mandelbrot\Mandelbrot\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
 C:\Users\koenv\Documents\Projects\UU\Mandelbrot\mandelbrot\Mandelbrot\Mandelbrot\obj\Debug\net6.0-windows\Mandelbrot.csproj.CopyComplete
+C:\Users\hugok\OneDrive\Documents\code\mandelbrot\Mandelbrot\Mandelbrot\bin\Debug\net6.0-windows\Google.Apis.dll
+C:\Users\hugok\OneDrive\Documents\code\mandelbrot\Mandelbrot\Mandelbrot\bin\Debug\net6.0-windows\Google.Apis.Auth.PlatformServices.dll
+C:\Users\hugok\OneDrive\Documents\code\mandelbrot\Mandelbrot\Mandelbrot\bin\Debug\net6.0-windows\Google.Apis.Auth.dll
+C:\Users\hugok\OneDrive\Documents\code\mandelbrot\Mandelbrot\Mandelbrot\bin\Debug\net6.0-windows\Google.Apis.Core.dll
+C:\Users\hugok\OneDrive\Documents\code\mandelbrot\Mandelbrot\Mandelbrot\bin\Debug\net6.0-windows\Google.Apis.Sheets.v4.dll
+C:\Users\hugok\OneDrive\Documents\code\mandelbrot\Mandelbrot\Mandelbrot\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
+C:\Users\hugok\OneDrive\Documents\code\mandelbrot\Mandelbrot\Mandelbrot\obj\Debug\net6.0-windows\Mandelbrot.csproj.CopyComplete
