@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Globalization;
+// Updated upstream
 using System.Diagnostics;
 
 using System.IO;
@@ -232,13 +233,17 @@ void IterateTroughPixels(string kleurZelfGekozen="kleur")
         }
 
         // Replace , to work on all computers, add culture to correct for system language
-        CultureInfo ci = CultureInfo.CurrentCulture;
-        string replacee = ",";
-        string replacement = ".";
-        if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; } 
-        float x = float.Parse(middenXInput.Text.Replace(replacee, replacement));
-        float y = float.Parse(middenYInput.Text.Replace(replacee, replacement));
-        float schaal = float.Parse(schaalInput.Text.Replace(replacee, replacement));
+        // CultureInfo ci = CultureInfo.CurrentCulture;
+        // string replacee = ",";
+        // string replacement = ".";
+        // if (ci.Name.ToString() == "nl-NL") { replacee = "."; replacement = ","; } 
+        // float x = float.Parse(middenXInput.Text.Replace(replacee, replacement));
+        // float y = float.Parse(middenYInput.Text.Replace(replacee, replacement));
+        // float schaal = float.Parse(schaalInput.Text.Replace(replacee, replacement));
+
+        float x = float.Parse(middenXInput.Text);
+        float y = float.Parse(middenYInput.Text);
+        float schaal = float.Parse(schaalInput.Text);
 
 
         ImageBoxImage.Invalidate();
@@ -365,10 +370,23 @@ void SetKleurRegenboog(int value) {
     }
 }
 
+int[] interpolation(int[] kleur1, int[] kleur2) {
+    int[] returnKleur = {0,0,0};
+
+    int r = Convert.ToInt32(Math.Floor((kleur2[0] - kleur1[0])* 0.5 + kleur1[0]));
+    int g = Convert.ToInt32(Math.Floor((kleur2[1] - kleur1[1])* 0.5 + kleur1[1]));
+    int b = Convert.ToInt32(Math.Floor((kleur2[2] - kleur1[2])* 0.5 + kleur1[2]));
+
+    returnKleur[0] = r;
+    returnKleur[1] = g;
+    returnKleur[2] = b;
+    return returnKleur;
+}
+
 void SetColorKleur(int value) {
     if (value != maxAantal) {
-        // verdeel het mandelgetal (value) over 16 verschillende kleuren
-        int colornr = value % 16;
+        // verdeel het mandelgetal (value) over 31 verschillende kleuren
+        int colornr = value % 31;
         switch(colornr) {
             case 0: {
                 // rgb(66, 30, 15)
@@ -378,6 +396,13 @@ void SetColorKleur(int value) {
                 break;
             }
             case 1: {
+                // om een zachtere overgang tussen de kleuren te krijgen rekent interpolation het gemiddelde van de twee kleuren uit
+                int[] kleur1 = {66, 30, 15};
+                int[] kleur2 = {25, 7, 26};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 2: {
                 // rgb(25, 7, 26)
                 kleur[0] = 25;
                 kleur[1] = 7;
@@ -385,7 +410,13 @@ void SetColorKleur(int value) {
                 break;
 
             }
-            case 2: {
+            case 3: {
+                int[] kleur1 = {25, 7, 26};
+                int[] kleur2 = {9, 1, 47};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 4: {
                 // rgb(9, 1, 47)
                 kleur[0] = 9;
                 kleur[1] = 1;
@@ -393,7 +424,13 @@ void SetColorKleur(int value) {
                 break;
 
             }
-            case 3: {
+            case 5: {
+                int[] kleur1 = {9, 1, 47};
+                int[] kleur2 = {4, 4, 73};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 6: {
                 // rgb(4, 4, 73)
                 kleur[0] = 4;
                 kleur[1] = 4;
@@ -401,7 +438,13 @@ void SetColorKleur(int value) {
                 break;
 
             }
-            case 4: {
+            case 7: {
+                int[] kleur1 = {4, 4, 73};
+                int[] kleur2 = {12, 44, 138};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 8: {
                 // rgb( 12, 44, 138)
                 kleur[0] = 12;
                 kleur[1] = 44;
@@ -409,7 +452,13 @@ void SetColorKleur(int value) {
                 break;
 
             }
-            case 5: {
+            case 9: {
+                int[] kleur1 = {12, 44, 138};
+                int[] kleur2 = {12, 44, 138};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 10: {
                 // rgb(12, 44, 138)
                 kleur[0] = 12;
                 kleur[1] = 44;
@@ -417,7 +466,13 @@ void SetColorKleur(int value) {
                 break;
 
             }
-            case 6: {
+            case 11: {
+                int[] kleur1 = {12, 44, 138};
+                int[] kleur2 = {24, 82, 177};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 12: {
                 // rgb(24, 82, 177)
                 kleur[0] = 24;
                 kleur[1] = 82;
@@ -425,7 +480,13 @@ void SetColorKleur(int value) {
                 break;
 
             }
-            case 7: {
+            case 13: {
+                int[] kleur1 = {24, 82, 177};
+                int[] kleur2 = {57, 125, 209};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 14: {
                 // rgb(57, 125, 209)
                 kleur[0] = 57;
                 kleur[1] = 125;
@@ -433,61 +494,112 @@ void SetColorKleur(int value) {
                 break;
 
             }
-            case 8: {
+            case 15: {
+                int[] kleur1 = {57, 125, 209};
+                int[] kleur2 = {134, 181, 229};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 16: {
                 kleur[0] = 134;
                 kleur[1] = 181;
                 kleur[2] = 229;
                 break;
-
             }
-            case 9: {
+            case 17: {
+                int[] kleur1 = {134, 181, 229};
+                int[] kleur2 = {211, 236, 248};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 18: {
                 kleur[0] = 211;
                 kleur[1] = 236;
                 kleur[2] = 248;
                 break;
 
             }
-            case 10: {
+            case 19: {
+                int[] kleur1 = {221, 236, 248};
+                int[] kleur2 = {241, 233, 191};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 20: {
                 kleur[0] = 241;
                 kleur[1] = 233;
                 kleur[2] = 191;
                 break;
-
             }
-            case 11: {
+            case 21: {
+                int[] kleur1 = {241, 233, 191};
+                int[] kleur2 = {248, 201, 95};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 22: {
                 kleur[0] = 248;
                 kleur[1] = 201;
                 kleur[2] = 95;
                 break;
-
             }
-            case 12: {
+            case 23: {
+                int[] kleur1 = {248, 201, 95};
+                int[] kleur2 = {255, 170, 0};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 24: {
                 kleur[0] = 255;
                 kleur[1] = 170;
                 kleur[2] = 0;
                 break;
 
             }
-            case 13: {
+            case 25: {
+                int[] kleur1 = {255, 170, 0};
+                int[] kleur2 = {204, 128, 0};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 26: {
                 kleur[0] = 204;
                 kleur[1] = 128;
                 kleur[2] = 0;
                 break;
 
             }
-            case 14: {
+            case 27: {
+                int[] kleur1 = {204, 128, 0};
+                int[] kleur2 = {153, 87, 0};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 28: {
                 kleur[0] = 153;
                 kleur[1] = 87;
                 kleur[2] = 0;
                 break;
 
             }
-            case 15: {
+            case 29: {
+                int[] kleur1 = {153, 87, 0};
+                int[] kleur2 = {106, 52, 3};
+                kleur = interpolation(kleur1, kleur2);
+                break;
+            }
+            case 30: {
                 kleur[0] = 106;
                 kleur[1] = 52;
                 kleur[2] = 3;
                 break;
 
+            }
+            case 31: {
+                int[] kleur1 = {66, 30, 15};
+                int[] kleur2 = {106, 52, 3};
+                kleur = interpolation(kleur1, kleur2);
+                break;
             }
 
         }
@@ -698,8 +810,8 @@ ConnectToDatabase();
 
 void ConnectToDatabase()
 {
-    try
-    {
+    // try
+    // {
         GoogleCredential credential;
         using (var stream = new FileStream("client_secrets.json", FileMode.Open, FileAccess.Read))
         {
@@ -715,11 +827,11 @@ void ConnectToDatabase()
 
         //call first time to initialize the presets into the dropdown
         ReadTemplates();
-    }
-    catch {
-        MessageBox.Show("Database connection was not successfull because you don't have the credentials on your device. This feature will be disabled for now");
-        databaseEnabled = false;
-    }
+    // }
+    // catch {
+    //     MessageBox.Show("Database connection was not successfull because you don't have the credentials on your device. This feature will be disabled for now");
+    //     databaseEnabled = false;
+    // }
 }
 
 void ReadTemplates() {
